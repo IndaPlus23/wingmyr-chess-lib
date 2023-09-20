@@ -62,7 +62,7 @@ pub struct Game {
 impl Game {
     /// Initialises a new board with pieces.
     pub fn new() -> Game {
-        let mut board: [Option<Piece>; 64] = [None; 64];
+        let mut bboard: [Option<Piece>; 64] = [None; 64];
 
         let board_template = [
             "RNBKQBNR",
@@ -92,8 +92,8 @@ impl Game {
                     }
                 };
                 if let Some(piece) = piece {
-                    let index = rank * 8 + file;
-                    board[index] = Some(piece);
+                    let index = rank * 8 + file; // hopefully puts in right place idk
+                    bboard[index] = Some(piece);
                 }
             }
         }
@@ -103,7 +103,7 @@ impl Game {
             state: GameState::InProgress,
             black: 0,
             white: 1,
-            board: [None; 64],
+            board: bboard,
         }
     }
 
@@ -141,7 +141,22 @@ impl fmt::Debug for Game {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         /* build board representation string */
 
-        write!(f, "")
+        let game = self;
+
+        let mut board_string = String::new();
+
+        for row in 0..game.board.len() {
+            for piece in game.board[row] {
+                let piece_2 = match piece {
+                    // get better variable names
+                    Piece::King(_) => board_string += "K ",
+                    _ => board_string += "* ",
+                };
+            }
+            board_string += "\n"
+        }
+
+        write!(f, "{}", board_string)
     }
 }
 
@@ -169,7 +184,7 @@ mod tests {
     fn game_in_progress_after_init() {
         let game = Game::new();
 
-        println!("{:?}", game);
+        println!("{:?} babagaboosh", game);
 
         assert_eq!(game.get_game_state(), GameState::InProgress);
     }
