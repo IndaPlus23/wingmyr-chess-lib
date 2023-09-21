@@ -32,12 +32,57 @@ impl Piece {
     /// new positions of that piece. Don't forget to the rules for check.
     ///
     /// (optional) Implement en passant and castling.
-    /* pub fn get_possible_moves(&self, _postion: &str) -> Option<Vec<String>> {
-            match &self {
-                Piece::King => /*...*/,
-                Piece::Queen => /*...*/,
+    pub fn get_possible_moves(&self, _position: &str) -> Option<Vec<String>> {
+        // reminder: position is "<file><rank>"
+        // there's probably a better solution
+        let position = _position
+            .split(|c| c == '<' || c == '>')
+            .filter(|s| !s.is_empty())
+            .map(|num| num.parse::<i32>().unwrap())
+            .collect::<Vec<i32>>();
+        let (file, rank) = (position[0], position[1]);
+        match &self {
+            Piece::King(_colour) => {
+                let mut legal_moves: Vec<String> = vec![];
+                if (rank - 1) * 8 + file > 0 {
+                    legal_moves.push(format!("<{}><{}>", file, rank - 1));
+
+                    if (rank - 1) * 8 + (file - 1) > (rank - 1) * 8 {
+                        legal_moves.push(format!("<{}><{}>", file - 1, (rank - 1)));
+                    }
+
+                    if (rank - 1) * 8 + (file + 1) < (rank - 1) * 8 + 8 {
+                        legal_moves.push(format!("<{}><{}>", file + 1, (rank - 1)));
+                    }
+                }
+
+                if (rank + 1) * 8 + file < 8 * 8 + file {
+                    legal_moves.push(format!("<{}><{}>", file, rank + 1));
+
+                    if (rank + 1) * 8 + (file - 1) > (rank + 1) * 8 {
+                        legal_moves.push(format!("<{}><{}>", file - 1, (rank + 1)));
+                    }
+
+                    if (rank + 1) * 8 + (file + 1) < (rank + 1) * 8 + 8 {
+                        legal_moves.push(format!("<{}><{}>", file + 1, (rank + 1)));
+                    }
+                }
+
+                if rank * 8 + (file - 1) > rank * 8 {
+                    legal_moves.push(format!("<{}><{}>", file - 1, rank));
+                }
+                if rank * 8 + (file + 1) < rank * 8 + 8 {
+                    legal_moves.push(format!("<{}><{}>", file + 1, rank));
+                } else {
+                    return None;
+                }
+
+                return Some(legal_moves);
+            }
+            _ => None,
+            // Piece::Queen => /*...*/,
         }
-    }  */
+    }
 
     pub fn get_colour(&self) -> Colour {
         match *self {
@@ -62,7 +107,7 @@ pub struct Game {
 impl Game {
     /// Initialises a new board with pieces.
     pub fn new() -> Game {
-        let mut bboard: [Option<Piece>; 64] = [None; 64];
+        let mut bboard: [Option<Piece>; 64] = [None; 64]; // needs better name
 
         let board_template = [
             "RNBKQBNR",
@@ -78,7 +123,9 @@ impl Game {
         let mut current_colour = Colour::Black; // 0 = black, 1 = white, might need to change this to include starting position idk
 
         for (rank, rank_str) in board_template.iter().enumerate() {
+            // get the rank intself and the index of the rank
             for (file, piece_char) in rank_str.chars().enumerate() {
+                // same thing but for each character in the rank
                 let piece = match piece_char {
                     'R' => Some(Piece::Rook(current_colour)),
                     'N' => Some(Piece::Knight(current_colour)),
@@ -92,7 +139,7 @@ impl Game {
                     }
                 };
                 if let Some(piece) = piece {
-                    let index = rank * 8 + file; // hopefully puts in right place idk
+                    let index = rank * 8 + file; // since bboard is a 1D array rank * 8 is used to denote which row is being written
                     bboard[index] = Some(piece);
                 }
             }
@@ -144,16 +191,26 @@ impl fmt::Debug for Game {
         let game = self;
 
         let mut board_string = String::new();
+        board_string += "\n";
 
-        for row in 0..game.board.len() {
-            for piece in game.board[row] {
-                let piece_2 = match piece {
-                    // get better variable names
-                    Piece::King(_) => board_string += "K ",
-                    _ => board_string += "* ",
-                };
+        for rank in 0..game.board.len() {
+            // for piece in game.board[rank] {
+            let piece = game.board[rank];
+            match piece {
+                // get better variable names
+                Some(Piece::King(_)) => board_string += "♔ ",
+                Some(Piece::Queen(_)) => board_string += "♕ ",
+                Some(Piece::Rook(_)) => board_string += "♖ ",
+                Some(Piece::Knight(_)) => board_string += "♘ ",
+                Some(Piece::Bishop(_)) => board_string += "♗ ",
+                Some(Piece::Pawn(_)) => board_string += "♙ ",
+                None => board_string += "* ",
+            };
+            // }
+            if (rank + 1) % 8 == 0 && rank != 0 {
+                println!("{}", rank);
+                board_string += "\n";
             }
-            board_string += "\n"
         }
 
         write!(f, "{}", board_string)
@@ -194,5 +251,20 @@ mod tests {
         let bpawn = Piece::Pawn(crate::Colour::Black);
 
         assert_eq!(bpawn.get_colour(), Colour::Black);
+    }
+
+    #[test]
+    fn legal_move_king() {
+        let game = Game::new();
+
+        let placeholder = true;
+
+        let king = Piece::King(crate::Colour::White);
+
+        let king_moves = king.get_possible_moves("<3><0>").unwrap();
+
+        println!("{:?}", king_moves);
+
+        assert_eq!(placeholder, true)
     }
 }
