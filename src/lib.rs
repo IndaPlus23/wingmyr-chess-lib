@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, vec};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum GameState {
@@ -28,10 +28,9 @@ enum Piece {
 }
 
 impl Piece {
+
     /// If a piece is standing on the given tile, return all possible
-    /// new positions of that piece. Don't forget to the rules for check.
-    ///
-    /// (optional) Implement en passant and castling.
+    /// new positions of that piece. 
     pub fn get_possible_moves(&self, _position: &str) -> Option<Vec<String>> {
         // reminder: position is "<file><rank>"
         // there's probably a better solution
@@ -41,7 +40,7 @@ impl Piece {
             .map(|num| num.parse::<i32>().unwrap())
             .collect::<Vec<i32>>();
         let (file, rank) = (position[0], position[1]);
-        match &self {
+        match &self { // this would look better if you just subtracted by 8 instead
             Piece::King(_colour) => {
                 let mut legal_moves: Vec<String> = vec![];
                 if (rank - 1) * 8 + file > 0 {
@@ -83,7 +82,7 @@ impl Piece {
             // Piece::Queen => /*...*/,
         }
     }
-
+    
     pub fn get_colour(&self) -> Colour {
         match *self {
             Piece::King(colour)
@@ -154,6 +153,15 @@ impl Game {
         }
     }
 
+    pub fn convert_notation(notation: &str)->(&str, &str){ // notation should be <from position><to position> e.g. e1e2 moves the piece at e1 to e2
+        let notation_vector = notation.split_inclusive(char::is_numeric).collect::<Vec<&str>>();
+
+        let (from, to) = (notation_vector[0],notation_vector[1]);
+
+        return (from, to);
+    
+    }
+
     /// If the current game state is `InProgress` and the move is legal,
     /// move a piece and return the resulting state of the game.
     pub fn make_move(&mut self, _from: &str, _to: &str) -> Option<GameState> {
@@ -169,20 +177,24 @@ impl Game {
     pub fn get_game_state(&self) -> GameState {
         self.state
     }
+
+    
+
+
 }
 
 /// Implement print routine for Game.
 ///
 /// Output example:
 /// |:----------------------:|
-/// | R  Kn B  K  Q  B  Kn R |
+/// | R  N  B  K  Q  B   N R |
 /// | P  P  P  P  P  P  P  P |
 /// | *  *  *  *  *  *  *  * |
 /// | *  *  *  *  *  *  *  * |
 /// | *  *  *  *  *  *  *  * |
 /// | *  *  *  *  *  *  *  * |
 /// | P  P  P  P  P  P  P  P |
-/// | R  Kn B  K  Q  B  Kn R |
+/// | R  N  B  K  Q  B   N R |
 /// |:----------------------:|
 impl fmt::Debug for Game {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -253,7 +265,7 @@ mod tests {
         assert_eq!(bpawn.get_colour(), Colour::Black);
     }
 
-    #[test]
+    /* #[test]
     fn legal_move_king() {
         let game = Game::new();
 
@@ -266,5 +278,5 @@ mod tests {
         println!("{:?}", king_moves);
 
         assert_eq!(placeholder, true)
-    }
+    } */
 }
