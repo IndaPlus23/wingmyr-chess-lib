@@ -187,7 +187,7 @@ impl Game {
 ///
 /// Output example:
 /// |:----------------------:|
-/// | R  N  B  K  Q  B   N R |
+/// | R  N  B  K  Q  B  N  R |
 /// | P  P  P  P  P  P  P  P |
 /// | *  *  *  *  *  *  *  * |
 /// | *  *  *  *  *  *  *  * |
@@ -279,4 +279,10 @@ mod tests {
 
         assert_eq!(placeholder, true)
     } */
+
+    #[test]
+    fn try_notation(){
+        println!("{:?}",Game::convert_notation("e1e2"));
+        
+    }
 }
