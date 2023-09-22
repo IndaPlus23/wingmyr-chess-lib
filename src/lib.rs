@@ -28,7 +28,7 @@ enum Piece {
 }
 
 impl Piece {
-
+///////////////////////////////// CHANGE THIS TO BE IN GAME AND ALSO TO WORK WITH THE NOTATION FUNCTION/////////////////////////////////////
     /// If a piece is standing on the given tile, return all possible
     /// new positions of that piece. 
     pub fn get_possible_moves(&self, _position: &str) -> Option<Vec<String>> {
