@@ -248,7 +248,6 @@ impl Game {
                 if vector.contains(&_to.to_string()) {
                     self.board[to as usize] = self.board[from as usize];
                     self.board[from as usize] = None;
-                    println!("aaaaa{:?}", self.board[to as usize]);
                 } else {
                     panic!("illegal move")
                 }
@@ -302,57 +301,68 @@ impl Game {
 
         let mut legal_moves: Vec<String> = vec![];
 
+        let mut new_pos: i32 = 0;
+
         match self.board[position as usize] {
             // this would look better if you just subtracted by 8 instead
 
             ////// change to be current colour later ///////
             Some(Piece::Pawn(Colour::White)) => {
                 if 8 < position && position < 16 {
-                    let mut new_pos = position + 8;
+                    new_pos = position + 8;
                     legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
 
                     new_pos = position + 16;
                     legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                 } else {
-                    legal_moves.push(format!("{}", position + 8))
+                    new_pos = position + 8;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                 }
             }
             Some(Piece::King(Colour::White)) => {
                 // 1 step back
                 if position - 1 * 8 > 0 {
-                    legal_moves.push(format!("{}", position - 8));
+                    new_pos = position - 8;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
 
                     // 1 step back-left
                     if (rank - 2) * 8 < position - 1 * 8 - 1 {
+                        new_pos = position - 8 - 1;
                         // check if target position is within the previous line
-                        legal_moves.push(format!("{}", position - 8 - 1));
+                        legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                     }
                     // 1 step back-right
                     if position - 8 + 1 > (rank - 1) * 8 {
-                        legal_moves.push(format!("{}", position - 8 + 1));
+                        new_pos = position - 8 + 1;
+                        legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                     }
                 }
                 // 1 step forward
                 if position + 8 < 8 * 8 {
-                    legal_moves.push(format!("{}", position + 8));
+                    new_pos = position + 8;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
 
                     // 1 step forward-left
                     if position + 8 - 1 > (rank + 1) * 8 {
-                        legal_moves.push(format!("{}", position + 8 - 1));
+                        new_pos = position + 8 - 1;
+                        legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                     }
                     // 1 step forward-right
                     if position + 8 + 1 < (rank + 2) * 8 - 1 {
-                        legal_moves.push(format!("{}", position + 8 + 1));
+                        new_pos = position + 8 + 1;
+                        legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                     }
                 }
 
                 // 1 step left
                 if position - 1 > (rank - 1) * 8 {
-                    legal_moves.push(format!("{}", position - 1));
+                    new_pos = position - 1;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                 }
                 // 1 step right
                 if position + 1 < (rank + 1) * 8 {
-                    legal_moves.push(format!("{}", position + 1));
+                    new_pos = position + 1;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                 } else {
                     return None;
                 }
@@ -498,7 +508,7 @@ mod tests {
 
         // let king = Piece::King(crate::Colour::White);
 
-        let king_moves = game.get_possible_moves("e2");
+        let king_moves = game.get_possible_moves("e1");
 
         println!("{:?}", king_moves);
 
