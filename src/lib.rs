@@ -1,3 +1,4 @@
+use core::panic;
 use std::{fmt, usize, vec};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -12,6 +13,19 @@ pub enum GameState {
  * - Write well structured and clean code!
  * - Read the Rust documentation, ask questions if you get stuck!
  */
+
+///  Board looks like this
+///  | H  G  F  E  D  C  B  A |
+///  |------------------------|
+/// 1| R  N  B  K  Q  B  N  R |
+/// 2| P  P  P  P  P  P  P  P | WHITE
+/// 3| *  *  *  *  *  *  *  * |
+/// 4| *  *  *  *  *  *  *  * |
+/// 5| *  *  *  *  *  *  *  * |
+/// 6| *  *  *  *  *  *  *  * |
+/// 7| P  P  P  P  P  P  P  P | BLACK
+/// 8| R  N  B  K  Q  B   N R |
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum Colour {
     White,
@@ -99,8 +113,9 @@ impl Piece {
 pub struct Game {
     /* save board, active colour, ... */
     state: GameState,
-    black: u64,
-    white: u64,
+    /* black: u64,
+    white: u64, */
+    colour: Colour,
     board: [Option<Piece>; 64],
 }
 
@@ -155,26 +170,92 @@ impl Game {
         Game {
             /* initialise board, set active colour to white, ... */
             state: GameState::InProgress,
-            black: 0,
-            white: 1,
+            /* black: 0,
+            white: 1, */
+            colour: Colour::White,
             board: bboard,
         }
     }
-
-    pub fn convert_notation(notation: &str) -> (&str, &str) {
-        // notation should be <from position><to position> e.g. e1e2 moves the piece at e1 to e2
-        let notation_vector = notation
+    /// Converts chess notation to position on the board
+    /// input should be should be standard chess notation for a single space on the board e.g. "e1" or "e2"
+    pub fn convert_from_notation(notation: &str) -> (i32, i32) {
+        /* let notation_vector = notation
             .split_inclusive(char::is_numeric)
             .collect::<Vec<&str>>();
 
         let (from, to) = (notation_vector[0], notation_vector[1]);
 
-        return (from, to);
+        return (from, to); */
+
+        let notation = notation
+            .split_inclusive(char::is_alphabetic)
+            .collect::<Vec<&str>>();
+        let rank = notation[1].parse::<i32>().unwrap() - 1;
+        let file = match notation[0] {
+            // board is backwards
+            "a" => 7,
+            "b" => 6,
+            "c" => 5,
+            "d" => 4,
+            "e" => 3,
+            "f" => 2,
+            "g" => 1,
+            "h" => 0,
+            _ => panic!(),
+        };
+
+        return (file, rank);
+    }
+
+    pub fn convert_to_notation(numeric_position: i32) -> String {
+        let rank = (numeric_position / 8) + 1;
+        let file = match numeric_position % 8 {
+            // board is backwards
+            7 => "a",
+            6 => "b",
+            5 => "c",
+            4 => "d",
+            3 => "e",
+            2 => "f",
+            1 => "g",
+            0 => "h",
+            _ => panic!(),
+        };
+        return format!("{}{}", file, rank);
     }
 
     /// If the current game state is `InProgress` and the move is legal,
     /// move a piece and return the resulting state of the game.
+    /// notation should be <from position><to position> e.g. e1e2 moves the piece at e1 to e2
     pub fn make_move(&mut self, _from: &str, _to: &str) -> Option<GameState> {
+        /* let (from, to) = (
+            Game::convert_from_notation(_from),
+            Game::convert_from_notation(_to),
+        ); */
+
+        let from = {
+            let (file, rank) = Game::convert_from_notation(_from);
+            rank * 8 + file
+        };
+
+        let to = {
+            let (file, rank) = Game::convert_from_notation(_to);
+            rank * 8 + file
+        };
+
+        match Game::get_possible_moves(&self, _from) {
+            Some(vector) => {
+                if vector.contains(&_to.to_string()) {
+                    self.board[to as usize] = self.board[from as usize];
+                    self.board[from as usize] = None;
+                    println!("aaaaa{:?}", self.board[to as usize]);
+                } else {
+                    panic!("illegal move")
+                }
+            }
+            None => panic!("No moves"), // really need to get rid of the panics
+        }
+
         None
     }
 
@@ -197,7 +278,7 @@ impl Game {
         .map(|num| num.parse::<i32>().unwrap())
         .collect::<Vec<i32>>(); */
 
-        let _position = _position
+        /* let _position = _position
             .split_inclusive(char::is_alphabetic)
             .collect::<Vec<&str>>();
         let rank = _position[1].parse::<i32>().unwrap() - 1;
@@ -214,13 +295,29 @@ impl Game {
             _ => panic!(),
         };
 
-        let position = rank * 8 + file;
+        let position = rank * 8 + file; // formula for getting position in the 1D array */
 
-        let position = rank * 8 + file;
+        let (file, rank) = Game::convert_from_notation(_position);
+        let position = rank * 8 + file; // formula for getting position in the 1D array
+
+        let mut legal_moves: Vec<String> = vec![];
+
         match self.board[position as usize] {
             // this would look better if you just subtracted by 8 instead
+
+            ////// change to be current colour later ///////
+            Some(Piece::Pawn(Colour::White)) => {
+                if 8 < position && position < 16 {
+                    let mut new_pos = position + 8;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+
+                    new_pos = position + 16;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
+                } else {
+                    legal_moves.push(format!("{}", position + 8))
+                }
+            }
             Some(Piece::King(Colour::White)) => {
-                let mut legal_moves: Vec<String> = vec![];
                 // 1 step back
                 if position - 1 * 8 > 0 {
                     legal_moves.push(format!("{}", position - 8));
@@ -259,12 +356,11 @@ impl Game {
                 } else {
                     return None;
                 }
-
-                return Some(legal_moves);
             }
             _ => panic!("{:?}", self.board[position as usize]),
             // Piece::Queen => /*...*/,
         }
+        return Some(legal_moves);
 
         /* let (file, rank) = (position[0], position[1]);
         match &self {
@@ -402,7 +498,7 @@ mod tests {
 
         // let king = Piece::King(crate::Colour::White);
 
-        let king_moves = game.get_possible_moves("e1");
+        let king_moves = game.get_possible_moves("e2");
 
         println!("{:?}", king_moves);
 
@@ -411,6 +507,15 @@ mod tests {
 
     #[test]
     fn try_notation() {
-        println!("{:?}", Game::convert_notation("e1e2"));
+        println!("{:?}", Game::convert_from_notation("e1"));
+    }
+
+    #[test]
+    fn try_make_move() {
+        let mut game = Game::new();
+
+        game.make_move("e2", "e4");
+
+        println!("{:?}", game)
     }
 }
