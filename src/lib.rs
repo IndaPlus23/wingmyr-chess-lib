@@ -142,30 +142,31 @@ impl Game {
                 }
             }
         }
-        /*
+        bboard[28] = Some(Piece::Knight(Colour::White)); //testing
+                                                         /*
 
-        for (rank, rank_str) in board_template.iter().enumerate() {
-            // get the rank intself and the index of the rank
-            for (file, piece_char) in rank_str.chars().enumerate() {
-                // same thing but for each character in the rank
-                let piece = match piece_char {
-                    'R' => Some(Piece::Rook(current_colour)),
-                    'N' => Some(Piece::Knight(current_colour)),
-                    'B' => Some(Piece::Bishop(current_colour)),
-                    'K' => Some(Piece::King(current_colour)),
-                    'Q' => Some(Piece::Queen(current_colour)),
-                    'P' => Some(Piece::Pawn(current_colour)),
-                    _ => {
-                        current_colour = Colour::White;
-                        None
-                    }
-                };
-                if let Some(piece) = piece {
-                    let index = rank * 8 + file; // since bboard is a 1D array rank * 8 is used to denote which row is being written
-                    bboard[index] = Some(piece);
-                }
-            }
-        }*/
+                                                         for (rank, rank_str) in board_template.iter().enumerate() {
+                                                             // get the rank intself and the index of the rank
+                                                             for (file, piece_char) in rank_str.chars().enumerate() {
+                                                                 // same thing but for each character in the rank
+                                                                 let piece = match piece_char {
+                                                                     'R' => Some(Piece::Rook(current_colour)),
+                                                                     'N' => Some(Piece::Knight(current_colour)),
+                                                                     'B' => Some(Piece::Bishop(current_colour)),
+                                                                     'K' => Some(Piece::King(current_colour)),
+                                                                     'Q' => Some(Piece::Queen(current_colour)),
+                                                                     'P' => Some(Piece::Pawn(current_colour)),
+                                                                     _ => {
+                                                                         current_colour = Colour::White;
+                                                                         None
+                                                                     }
+                                                                 };
+                                                                 if let Some(piece) = piece {
+                                                                     let index = rank * 8 + file; // since bboard is a 1D array rank * 8 is used to denote which row is being written
+                                                                     bboard[index] = Some(piece);
+                                                                 }
+                                                             }
+                                                         }*/
 
         Game {
             /* initialise board, set active colour to white, ... */
@@ -301,7 +302,7 @@ impl Game {
 
         let mut legal_moves: Vec<String> = vec![];
 
-        let mut new_pos: i32 = 0;
+        let mut new_pos: i32;
 
         match self.board[position as usize] {
             // this would look better if you just subtracted by 8 instead
@@ -309,6 +310,7 @@ impl Game {
             ////// change to be current colour later ///////
             Some(Piece::Pawn(Colour::White)) => {
                 if 8 < position && position < 16 {
+                    // if pawn hasn't been moved
                     new_pos = position + 8;
                     legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
 
@@ -319,6 +321,103 @@ impl Game {
                     legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                 }
             }
+            Some(Piece::Rook(Colour::White)) => {
+                let rank_range = 64 / 8;
+                let file_range = 8;
+
+                for y in 0..rank_range {
+                    new_pos = y * 8 + file;
+                    if file <= new_pos && new_pos <= 7 * 8 + file {
+                        legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                    }
+                }
+                for x in 0..file_range {
+                    new_pos = rank * 8 + x;
+                    if rank * 8 < x && x < (rank + 1) * 8 {
+                        legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                    }
+                }
+            }
+            // painful
+            /* Some(Piece::Bishop(Colour::White)) => {
+                for i in 0..8{
+                    new_pos = (rank) *8 + file+i;
+                    if 0 <= new_pos && new_pos <= 63{
+
+                    }
+                }
+            } */
+            Some(Piece::Knight(Colour::White)) => {
+                // forward
+                if (rank + 2) * 8 < 7 * 8 + file {
+                    // right
+                    if file + 1 < 8 {
+                        legal_moves.push(format!(
+                            "{}",
+                            Game::convert_to_notation((rank + 2) * 8 + file + 1)
+                        ));
+                    }
+                    // left
+                    if file - 1 >= 0 {
+                        legal_moves.push(format!(
+                            "{}",
+                            Game::convert_to_notation((rank + 2) * 8 + file - 1)
+                        ));
+                    }
+                }
+                // backwards
+                if (rank - 2) * 8 > 0 {
+                    //right
+                    if file + 1 < 8 {
+                        legal_moves.push(format!(
+                            "{}",
+                            Game::convert_to_notation((rank - 2) * 8 + file + 1)
+                        ));
+                    }
+                    // left
+                    if file - 1 >= 0 {
+                        legal_moves.push(format!(
+                            "{}",
+                            Game::convert_to_notation((rank - 2) * 8 + file - 1)
+                        ));
+                    }
+                }
+                // right
+                if file + 2 < 8 {
+                    // forward
+                    if (rank + 1) * 8 < 7 * 8 + file + 2 {
+                        legal_moves.push(format!(
+                            "{}",
+                            Game::convert_to_notation((rank + 1) * 8 + file + 2)
+                        ));
+                    }
+                    // backward
+                    if (rank - 1) * 8 < 7 * 8 + file + 2 {
+                        legal_moves.push(format!(
+                            "{}",
+                            Game::convert_to_notation((rank - 1) * 8 + file + 2)
+                        ));
+                    }
+                }
+                // left
+                if file - 2 >= 0 {
+                    //backward
+                    if (rank - 1) * 8 < 7 * 8 + file - 2 {
+                        legal_moves.push(format!(
+                            "{}",
+                            Game::convert_to_notation((rank - 1) * 8 + file - 2)
+                        ));
+                    }
+                    // forward
+                    if (rank + 1) * 8 < 7 * 8 + file - 2 {
+                        legal_moves.push(format!(
+                            "{}",
+                            Game::convert_to_notation((rank + 1) * 8 + file - 2)
+                        ));
+                    }
+                }
+            }
+
             Some(Piece::King(Colour::White)) => {
                 // 1 step back
                 if position - 1 * 8 > 0 {
@@ -501,23 +600,23 @@ mod tests {
     }
 
     #[test]
-    fn legal_move_king() {
+    fn legal_moves() {
         let game = Game::new();
 
         let placeholder = true;
 
         // let king = Piece::King(crate::Colour::White);
 
-        let king_moves = game.get_possible_moves("e1");
+        let moves = game.get_possible_moves("d4");
 
-        println!("{:?}", king_moves);
+        println!("{:?}", moves);
 
         assert_eq!(placeholder, true)
     }
 
     #[test]
     fn try_notation() {
-        println!("{:?}", Game::convert_from_notation("e1"));
+        println!("{:?}", Game::convert_from_notation("a1"));
     }
 
     #[test]
