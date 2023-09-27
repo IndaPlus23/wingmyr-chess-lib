@@ -27,7 +27,7 @@ pub enum GameState {
 /// 8| R  N  B  K  Q  B   N R |
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-enum Colour {
+pub enum Colour {
     White,
     Black,
 }
@@ -42,9 +42,9 @@ enum Piece {
 }
 
 impl Piece {
-    ///////////////////////////////// CHANGE THIS TO BE IN GAME AND ALSO TO WORK WITH THE NOTATION FUNCTION/////////////////////////////////////
+    /* ///////////////////////////////// CHANGE THIS TO BE IN GAME AND ALSO TO WORK WITH THE NOTATION FUNCTION/////////////////////////////////////
     /// If a piece is standing on the given tile, return all possible
-    /// new positions of that piece.
+    /// new positions of that piece. */
     /* pub fn get_possible_moves(&self, _position: &str) -> Option<Vec<String>> {
         // reminder: position is "<file><rank>"
         // there's probably a better solution
@@ -97,17 +97,6 @@ impl Piece {
             // Piece::Queen => /*...*/,
         }
     } */
-
-    pub fn get_colour(&self) -> Colour {
-        match *self {
-            Piece::King(colour)
-            | Piece::Queen(colour)
-            | Piece::Rook(colour)
-            | Piece::Knight(colour)
-            | Piece::Bishop(colour)
-            | Piece::Pawn(colour) => colour,
-        }
-    }
 }
 
 pub struct Game {
@@ -115,7 +104,7 @@ pub struct Game {
     state: GameState,
     /* black: u64,
     white: u64, */
-    colour: Colour,
+    active_colour: Colour,
     board: [Option<Piece>; 64],
 }
 
@@ -172,7 +161,7 @@ impl Game {
             state: GameState::InProgress,
             /* black: 0,
             white: 1, */
-            colour: Colour::White,
+            active_colour: Colour::Black, /* White */
             board: bboard,
         }
     }
@@ -224,6 +213,18 @@ impl Game {
         return format!("{}{}", file, rank);
     }
 
+    pub fn get_piece_colour(&self, position: i32) -> Option<Colour> {
+        match self.board[position as usize] {
+            Some(Piece::King(colour))
+            | Some(Piece::Queen(colour))
+            | Some(Piece::Rook(colour))
+            | Some(Piece::Knight(colour))
+            | Some(Piece::Bishop(colour))
+            | Some(Piece::Pawn(colour)) => Some(colour),
+            None => None,
+        }
+    }
+
     /// If the current game state is `InProgress` and the move is legal,
     /// move a piece and return the resulting state of the game.
     /// notation should be <from position><to position> e.g. e1e2 moves the piece at e1 to e2
@@ -252,10 +253,16 @@ impl Game {
                     panic!("illegal move")
                 }
             }
-            None => panic!("No moves"), // really need to get rid of the panics
+            None => return None, // really need to get rid of the panics
         }
 
-        None
+        if self.active_colour == Colour::White {
+            self.active_colour = Colour::Black
+        } else {
+            self.active_colour = Colour::White
+        }
+
+        return Some(GameState::InProgress);
     }
 
     /// (Optional but recommended) Set the piece type that a pawn becames following a promotion.
@@ -304,9 +311,28 @@ impl Game {
         let mut new_pos: i32;
 
         match self.board[position as usize] {
+            Some(Piece::King(colour))
+            | Some(Piece::Queen(colour))
+            | Some(Piece::Rook(colour))
+            | Some(Piece::Knight(colour))
+            | Some(Piece::Bishop(colour))
+            | Some(Piece::Pawn(colour)) => {
+                if colour != self.active_colour {
+                    eprintln!("not your piece");
+                    return None;
+                }
+            }
+            None => {
+                eprintln!("no piece");
+                return None;
+            }
+        }
+
+        // #TODO# make looping code break when have reached piece
+        match self.board[position as usize] {
             ////// change to be current colour later ///////
             Some(Piece::Pawn(Colour::White)) => {
-                if 8 < position && position < 16 {
+                if 8 < position && position <= 16 {
                     // if pawn hasn't been moved
                     new_pos = position + 8;
                     legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
@@ -318,12 +344,35 @@ impl Game {
                     legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                 }
             }
-            Some(Piece::Rook(Colour::White)) => {
+            Some(Piece::Pawn(Colour::Black)) => {
+                if 48 < position && position <= 56 {
+                    // if pawn hasn't been moved
+                    new_pos = position - 8;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+
+                    new_pos = position - 16;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
+                } else {
+                    new_pos = position - 8;
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                }
+            }
+            Some(Piece::Rook(_colour)) => {
                 let rank_range = 64 / 8;
                 let file_range = 8;
 
                 for y in 0..rank_range {
                     new_pos = y * 8 + file;
+
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                            break;
+                        }
+                    }
+
                     if file <= new_pos && new_pos <= 7 * 8 + file {
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                     }
@@ -336,7 +385,7 @@ impl Game {
                 }
             }
             // painful
-            Some(Piece::Bishop(Colour::White)) => {
+            Some(Piece::Bishop(_colour)) => {
                 // probably a better way to do this
                 eprintln!("forward-right");
                 for i in 0..8 {
@@ -436,7 +485,7 @@ impl Game {
                 }
             }
 
-            Some(Piece::Queen(Colour::White)) => {
+            Some(Piece::Queen(_colour)) => {
                 //Diagonal movement
                 // probably a better way to do this
                 eprintln!("forward-right");
@@ -554,7 +603,7 @@ impl Game {
                 }
             }
 
-            Some(Piece::Knight(Colour::White)) => {
+            Some(Piece::Knight(_colour)) => {
                 // forward
                 if (rank + 2) * 8 < 7 * 8 + file {
                     // right
@@ -625,7 +674,7 @@ impl Game {
                 }
             }
 
-            Some(Piece::King(Colour::White)) => {
+            Some(Piece::King(_colour)) => {
                 // 1 step back
                 if position - 1 * 8 > 0 {
                     new_pos = position - 8;
@@ -674,7 +723,6 @@ impl Game {
                 }
             }
             _ => panic!("{:?}", self.board[position as usize]),
-            // Piece::Queen => /*...*/,
         }
         return Some(legal_moves);
 
@@ -799,12 +847,12 @@ mod tests {
         assert_eq!(game.get_game_state(), GameState::InProgress);
     }
 
-    #[test]
+    /*     #[test]
     fn colour_test() {
         let bpawn = Piece::Pawn(crate::Colour::Black);
 
         assert_eq!(bpawn.get_colour(), Colour::Black);
-    }
+    } */
 
     #[test]
     fn legal_moves() {
@@ -814,7 +862,7 @@ mod tests {
 
         // let king = Piece::King(crate::Colour::White);
 
-        let moves = game.get_possible_moves("d1");
+        let moves = game.get_possible_moves("a1");
 
         println!("{:?}", moves);
 
