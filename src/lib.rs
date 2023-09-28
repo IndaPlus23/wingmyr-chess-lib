@@ -336,21 +336,24 @@ impl Game {
                 if 8 < position && position <= 16 {
                     // if pawn hasn't been moved
                     new_pos = position + 8;
-                    if self.board[new_pos as usize].is_none(){
-                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));}
+                    if self.board[(position + 8) as usize].is_none(){
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
 
                     new_pos = position + 16; // two steps forward
-                    if self.board[(position + 8) as usize].is_none(){
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));}
                 } else {
                     new_pos = position + 8;
                     if self.board[new_pos as usize].is_none(){
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));}
                 }
-                if self.board[(position + 8 + 1) as usize].is_some() || self.board[(position+8-1) as usize].is_some(){
+                // check for capturable pieces
+                if self.board[(position + 8 + 1) as usize].is_some(){
                     if self.get_piece_colour(position+8-1) != Some(self.active_colour){
                         legal_moves.push(format!("{}", Game::convert_to_notation(position+8-1)));
                     }
+                } 
+                if self.board[(position+8-1) as usize].is_some(){  
+                    
                     if self.get_piece_colour(position+8+1) != Some(self.active_colour){
                         legal_moves.push(format!("{}", Game::convert_to_notation(position+8+1)));
                     }
@@ -360,13 +363,29 @@ impl Game {
                 if 48 < position && position <= 56 {
                     // if pawn hasn't been moved
                     new_pos = position - 8;
+                    if self.board[(position - 8) as usize].is_none(){
                     legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
 
                     new_pos = position - 16;
-                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))}
                 } else {
                     new_pos = position - 8;
-                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                    if self.board[new_pos as usize].is_none(){
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));}
+                }
+
+                if self.board[(position - 8 + 1) as usize].is_some(){
+                    if self.get_piece_colour(position+8-1) != Some(self.active_colour){
+                        legal_moves.push(format!("{}", Game::convert_to_notation(position-8-1)));
+                    }
+                }
+                
+                
+                 if self.board[(position-8-1) as usize].is_some(){
+                    
+                    if self.get_piece_colour(position+8+1) != Some(self.active_colour){
+                        legal_moves.push(format!("{}", Game::convert_to_notation(position-8+1)));
+                    }
                 }
             }
             Some(Piece::Rook(_colour)) => {
@@ -376,11 +395,12 @@ impl Game {
                 for y in 0..rank_range {
                     new_pos = y * 8 + file;
 
+                    // check if something's in the way
                     if self.board[new_pos as usize].is_some() {
-                        if self.get_piece_colour(position) == Some(self.active_colour) {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
                             break;
                         } else {
-                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
                             break;
                         }
                     }
@@ -392,11 +412,12 @@ impl Game {
                 for x in 0..file_range {
                     new_pos = rank * 8 + x;
 
+                    // check if something's in the way
                     if self.board[new_pos as usize].is_some() {
-                        if self.get_piece_colour(position) == Some(self.active_colour) {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
                             break;
                         } else {
-                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
                             break;
                         }
                     }
@@ -415,6 +436,16 @@ impl Game {
                     /* if 0 <= new_pos && new_pos <= 63{
 
                     } */
+
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
 
                     let current_file = new_pos - (rank + i) * 8;
                     let current_rank = (new_pos - (file + i)) / 8;
@@ -440,6 +471,16 @@ impl Game {
 
                     } */
 
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
+
                     let current_file = new_pos - (rank + i) * 8;
                     let current_rank = (new_pos - (file - i)) / 8;
 
@@ -464,6 +505,16 @@ impl Game {
 
                     } */
 
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
+
                     let current_file = new_pos - (rank - i) * 8;
                     let current_rank = (new_pos - (file - i)) / 8;
 
@@ -487,6 +538,16 @@ impl Game {
                     /* if 0 <= new_pos && new_pos <= 63{
 
                     } */
+
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
 
                     let current_file = new_pos - (rank - i) * 8;
                     let current_rank = (new_pos - (file + i)) / 8;
@@ -517,6 +578,16 @@ impl Game {
 
                     } */
 
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
+
                     let current_file = new_pos - (rank + i) * 8;
                     let current_rank = (new_pos - (file + i)) / 8;
 
@@ -540,6 +611,16 @@ impl Game {
                     /* if 0 <= new_pos && new_pos <= 63{
 
                     } */
+
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
 
                     let current_file = new_pos - (rank + i) * 8;
                     let current_rank = (new_pos - (file - i)) / 8;
@@ -565,6 +646,16 @@ impl Game {
 
                     } */
 
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
+
                     let current_file = new_pos - (rank - i) * 8;
                     let current_rank = (new_pos - (file - i)) / 8;
 
@@ -588,6 +679,16 @@ impl Game {
                     /* if 0 <= new_pos && new_pos <= 63{
 
                     } */
+
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
 
                     let current_file = new_pos - (rank - i) * 8;
                     let current_rank = (new_pos - (file + i)) / 8;
@@ -613,19 +714,40 @@ impl Game {
 
                 for y in 0..rank_range {
                     new_pos = y * 8 + file;
+
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
+
                     if file <= new_pos && new_pos <= 7 * 8 + file {
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                     }
                 }
                 for x in 0..file_range {
                     new_pos = rank * 8 + x;
+
+                    // check if something's in the way
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {        // break if friendly piece
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));// add move and break if enemy piece
+                            break;
+                        }
+                    }
                     if rank * 8 <= x && x < (rank + 1) * 8 {
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                     }
                 }
             }
 
-            Some(Piece::Knight(_colour)) => {
+            Some(Piece::Knight(_colour)) => { // TODO you can apparently break if statements so try that
                 // forward
                 if (rank + 2) * 8 < 7 * 8 + file {
                     // right
@@ -681,6 +803,7 @@ impl Game {
                 if file - 2 >= 0 {
                     //backward
                     if (rank - 1) * 8 < 7 * 8 + file - 2 {
+                        
                         legal_moves.push(format!(
                             "{}",
                             Game::convert_to_notation((rank - 1) * 8 + file - 2)
@@ -748,49 +871,11 @@ impl Game {
         }
         return Some(legal_moves);
 
-        /* let (file, rank) = (position[0], position[1]);
-        match &self {
-            // this would look better if you just subtracted by 8 instead
-            Piece::King(_colour) => {
-                let mut legal_moves: Vec<String> = vec![];
-                if (rank - 1) * 8 + file > 0 {
-                    legal_moves.push(format!("<{}><{}>", file, rank - 1));
+    }
 
-                    if (rank - 1) * 8 + (file - 1) > (rank - 1) * 8 {
-                        legal_moves.push(format!("<{}><{}>", file - 1, (rank - 1)));
-                    }
-
-                    if (rank - 1) * 8 + (file + 1) < (rank - 1) * 8 + 8 {
-                        legal_moves.push(format!("<{}><{}>", file + 1, (rank - 1)));
-                    }
-                }
-
-                if (rank + 1) * 8 + file < 8 * 8 + file {
-                    legal_moves.push(format!("<{}><{}>", file, rank + 1));
-
-                    if (rank + 1) * 8 + (file - 1) > (rank + 1) * 8 {
-                        legal_moves.push(format!("<{}><{}>", file - 1, (rank + 1)));
-                    }
-
-                    if (rank + 1) * 8 + (file + 1) < (rank + 1) * 8 + 8 {
-                        legal_moves.push(format!("<{}><{}>", file + 1, (rank + 1)));
-                    }
-                }
-
-                if rank * 8 + (file - 1) > rank * 8 {
-                    legal_moves.push(format!("<{}><{}>", file - 1, rank));
-                }
-                if rank * 8 + (file + 1) < rank * 8 + 8 {
-                    legal_moves.push(format!("<{}><{}>", file + 1, rank));
-                } else {
-                    return None;
-                }
-
-                return Some(legal_moves);
-            }
-            _ => None,
-            // Piece::Queen => /*...*/,
-        } */
+    /// takes position where king is standing or will be standing and returns true if that space is threatened
+    pub fn check_checker(position: &str)->bool{
+        return false
     }
 }
 
@@ -884,7 +969,7 @@ mod tests {
 
         // let king = Piece::King(crate::Colour::White);
 
-        let moves = game.get_possible_moves("g2");
+        let moves = game.get_possible_moves("d1");
 
         println!("{:?}", moves);
 
