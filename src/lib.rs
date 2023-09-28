@@ -45,58 +45,6 @@ impl Piece {
     ///////////////////////////////// CHANGE THIS TO BE IN GAME AND ALSO TO WORK WITH THE NOTATION FUNCTION/////////////////////////////////////
     /// If a piece is standing on the given tile, return all possible
     /// new positions of that piece.
-    /* pub fn get_possible_moves(&self, _position: &str) -> Option<Vec<String>> {
-        // reminder: position is "<file><rank>"
-        // there's probably a better solution
-        let position = _position
-            .split(|c| c == '<' || c == '>')
-            .filter(|s| !s.is_empty())
-            .map(|num| num.parse::<i32>().unwrap())
-            .collect::<Vec<i32>>();
-        let (file, rank) = (position[0], position[1]);
-        match &self {
-            // this would look better if you just subtracted by 8 instead
-            Piece::King(_colour) => {
-                let mut legal_moves: Vec<String> = vec![];
-                if (rank - 1) * 8 + file > 0 {
-                    legal_moves.push(format!("<{}><{}>", file, rank - 1));
-
-                    if (rank - 1) * 8 + (file - 1) > (rank - 1) * 8 {
-                        legal_moves.push(format!("<{}><{}>", file - 1, (rank - 1)));
-                    }
-
-                    if (rank - 1) * 8 + (file + 1) < (rank - 1) * 8 + 8 {
-                        legal_moves.push(format!("<{}><{}>", file + 1, (rank - 1)));
-                    }
-                }
-
-                if (rank + 1) * 8 + file < 8 * 8 + file {
-                    legal_moves.push(format!("<{}><{}>", file, rank + 1));
-
-                    if (rank + 1) * 8 + (file - 1) > (rank + 1) * 8 {
-                        legal_moves.push(format!("<{}><{}>", file - 1, (rank + 1)));
-                    }
-
-                    if (rank + 1) * 8 + (file + 1) < (rank + 1) * 8 + 8 {
-                        legal_moves.push(format!("<{}><{}>", file + 1, (rank + 1)));
-                    }
-                }
-
-                if rank * 8 + (file - 1) > rank * 8 {
-                    legal_moves.push(format!("<{}><{}>", file - 1, rank));
-                }
-                if rank * 8 + (file + 1) < rank * 8 + 8 {
-                    legal_moves.push(format!("<{}><{}>", file + 1, rank));
-                } else {
-                    return None;
-                }
-
-                return Some(legal_moves);
-            }
-            _ => None,
-            // Piece::Queen => /*...*/,
-        }
-    } */
 
     pub fn get_colour(&self) -> Colour {
         match *self {
@@ -142,30 +90,6 @@ impl Game {
                 }
             }
         }
-        /*
-
-        for (rank, rank_str) in board_template.iter().enumerate() {
-            // get the rank intself and the index of the rank
-            for (file, piece_char) in rank_str.chars().enumerate() {
-                // same thing but for each character in the rank
-                let piece = match piece_char {
-                    'R' => Some(Piece::Rook(current_colour)),
-                    'N' => Some(Piece::Knight(current_colour)),
-                    'B' => Some(Piece::Bishop(current_colour)),
-                    'K' => Some(Piece::King(current_colour)),
-                    'Q' => Some(Piece::Queen(current_colour)),
-                    'P' => Some(Piece::Pawn(current_colour)),
-                    _ => {
-                        current_colour = Colour::White;
-                        None
-                    }
-                };
-                if let Some(piece) = piece {
-                    let index = rank * 8 + file; // since bboard is a 1D array rank * 8 is used to denote which row is being written
-                    bboard[index] = Some(piece);
-                }
-            }
-        }*/
 
         Game {
             /* initialise board, set active colour to white, ... */
@@ -179,14 +103,6 @@ impl Game {
     /// Converts chess notation to position on the board
     /// input should be should be standard chess notation for a single space on the board e.g. "e1" or "e2"
     pub fn convert_from_notation(notation: &str) -> (i32, i32) {
-        /* let notation_vector = notation
-            .split_inclusive(char::is_numeric)
-            .collect::<Vec<&str>>();
-
-        let (from, to) = (notation_vector[0], notation_vector[1]);
-
-        return (from, to); */
-
         let notation = notation
             .split_inclusive(char::is_alphabetic)
             .collect::<Vec<&str>>();
@@ -228,11 +144,6 @@ impl Game {
     /// move a piece and return the resulting state of the game.
     /// notation should be <from position><to position> e.g. e1e2 moves the piece at e1 to e2
     pub fn make_move(&mut self, _from: &str, _to: &str) -> Option<GameState> {
-        /* let (from, to) = (
-            Game::convert_from_notation(_from),
-            Game::convert_from_notation(_to),
-        ); */
-
         let from = {
             let (file, rank) = Game::convert_from_notation(_from);
             rank * 8 + file
@@ -271,30 +182,6 @@ impl Game {
     pub fn get_possible_moves(&self, _position: &str) -> Option<Vec<String>> {
         // reminder: position is "<file><rank>"
         // there's probably a better solution
-        /* let position = _position
-        .split(|c| c == '<' || c == '>')
-        .filter(|s| !s.is_empty())
-        .map(|num| num.parse::<i32>().unwrap())
-        .collect::<Vec<i32>>(); */
-
-        /* let _position = _position
-            .split_inclusive(char::is_alphabetic)
-            .collect::<Vec<&str>>();
-        let rank = _position[1].parse::<i32>().unwrap() - 1;
-        let file = match _position[0] {
-            // board is backwards
-            "a" => 7,
-            "b" => 6,
-            "c" => 5,
-            "d" => 4,
-            "e" => 3,
-            "f" => 2,
-            "g" => 1,
-            "h" => 0,
-            _ => panic!(),
-        };
-
-        let position = rank * 8 + file; // formula for getting position in the 1D array */
 
         let (file, rank) = Game::convert_from_notation(_position);
         let position = rank * 8 + file; // formula for getting position in the 1D array
@@ -318,7 +205,7 @@ impl Game {
                     legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                 }
             }
-            Some(Piece::Rook(Colour::White)) => {
+            Some(Piece::Rook(_colour)) => {
                 let rank_range = 64 / 8;
                 let file_range = 8;
 
@@ -336,26 +223,18 @@ impl Game {
                 }
             }
             // painful
-            Some(Piece::Bishop(Colour::White)) => {
+            Some(Piece::Bishop(_colour)) => {
                 // probably a better way to do this
                 eprintln!("forward-right");
                 for i in 0..8 {
                     new_pos = (rank + i) * 8 + file + i;
-                    /* if 0 <= new_pos && new_pos <= 63{
-
-                    } */
 
                     let current_file = new_pos - (rank + i) * 8;
                     let current_rank = (new_pos - (file + i)) / 8;
 
                     if (0 <= current_file && current_file <= 7)
                         && (0 <= current_rank && current_rank <= 7)
-                    /* (0 <= new_pos && new_pos <= 7)
-                        || (56 <= new_pos && new_pos <= 63)
-                        || (new_pos % 8 == 7 || new_pos % 8 == 0) */
-                    /* && ((rank + i) * 8 + (file + i)) / 8 > 8  */
                     {
-                        // eprintln!("({}, {})", file + i, rank + i)
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                     } else {
                         eprintln!("reached the border");
@@ -365,21 +244,13 @@ impl Game {
                 eprintln!("forward-left");
                 for i in 0..8 {
                     new_pos = (rank + i) * 8 + file - i;
-                    /* if 0 <= new_pos && new_pos <= 63{
-
-                    } */
 
                     let current_file = new_pos - (rank + i) * 8;
                     let current_rank = (new_pos - (file - i)) / 8;
 
                     if (0 <= current_file && current_file <= 7)
                         && (0 <= current_rank && current_rank <= 7)
-                    /* (0 <= new_pos && new_pos <= 7)
-                        || (56 <= new_pos && new_pos <= 63)
-                        || (new_pos % 8 == 7 || new_pos % 8 == 0) */
-                    /* && ((rank + i) * 8 + (file + i)) / 8 > 8  */
                     {
-                        // eprintln!("({}, {})", file - i, rank + i)
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                     } else {
                         eprintln!("reached the border");
@@ -389,21 +260,13 @@ impl Game {
                 eprintln!("backward-left");
                 for i in 0..8 {
                     new_pos = (rank - i) * 8 + file - i;
-                    /* if 0 <= new_pos && new_pos <= 63{
-
-                    } */
 
                     let current_file = new_pos - (rank - i) * 8;
                     let current_rank = (new_pos - (file - i)) / 8;
 
                     if (0 <= current_file && current_file <= 7)
                         && (0 <= current_rank && current_rank <= 7)
-                    /* (0 <= new_pos && new_pos <= 7)
-                        || (56 <= new_pos && new_pos <= 63)
-                        || (new_pos % 8 == 7 || new_pos % 8 == 0) */
-                    /* && ((rank + i) * 8 + (file + i)) / 8 > 8  */
                     {
-                        // eprintln!("({}, {})", file - i, rank - i)
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                     } else {
                         eprintln!("reached the border");
@@ -413,21 +276,13 @@ impl Game {
                 eprintln!("backward-right");
                 for i in 0..8 {
                     new_pos = (rank - i) * 8 + file + i;
-                    /* if 0 <= new_pos && new_pos <= 63{
-
-                    } */
 
                     let current_file = new_pos - (rank - i) * 8;
                     let current_rank = (new_pos - (file + i)) / 8;
 
                     if (0 <= current_file && current_file <= 7)
                         && (0 <= current_rank && current_rank <= 7)
-                    /* (0 <= new_pos && new_pos <= 7)
-                        || (56 <= new_pos && new_pos <= 63)
-                        || (new_pos % 8 == 7 || new_pos % 8 == 0) */
-                    /* && ((rank + i) * 8 + (file + i)) / 8 > 8  */
                     {
-                        // eprintln!("({}, {})", file + i, rank - i)
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                     } else {
                         eprintln!("reached the border");
@@ -436,27 +291,19 @@ impl Game {
                 }
             }
 
-            Some(Piece::Queen(Colour::White)) => {
+            Some(Piece::Queen(_colour)) => {
                 //Diagonal movement
                 // probably a better way to do this
                 eprintln!("forward-right");
                 for i in 0..8 {
                     new_pos = (rank + i) * 8 + file + i;
-                    /* if 0 <= new_pos && new_pos <= 63{
-
-                    } */
 
                     let current_file = new_pos - (rank + i) * 8;
                     let current_rank = (new_pos - (file + i)) / 8;
 
                     if (0 <= current_file && current_file <= 7)
                         && (0 <= current_rank && current_rank <= 7)
-                    /* (0 <= new_pos && new_pos <= 7)
-                        || (56 <= new_pos && new_pos <= 63)
-                        || (new_pos % 8 == 7 || new_pos % 8 == 0) */
-                    /* && ((rank + i) * 8 + (file + i)) / 8 > 8  */
                     {
-                        // eprintln!("({}, {})", file + i, rank + i)
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                     } else {
                         eprintln!("reached the border");
@@ -466,21 +313,13 @@ impl Game {
                 eprintln!("forward-left");
                 for i in 0..8 {
                     new_pos = (rank + i) * 8 + file - i;
-                    /* if 0 <= new_pos && new_pos <= 63{
-
-                    } */
 
                     let current_file = new_pos - (rank + i) * 8;
                     let current_rank = (new_pos - (file - i)) / 8;
 
                     if (0 <= current_file && current_file <= 7)
                         && (0 <= current_rank && current_rank <= 7)
-                    /* (0 <= new_pos && new_pos <= 7)
-                        || (56 <= new_pos && new_pos <= 63)
-                        || (new_pos % 8 == 7 || new_pos % 8 == 0) */
-                    /* && ((rank + i) * 8 + (file + i)) / 8 > 8  */
                     {
-                        // eprintln!("({}, {})", file - i, rank + i)
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                     } else {
                         eprintln!("reached the border");
@@ -490,21 +329,13 @@ impl Game {
                 eprintln!("backward-left");
                 for i in 0..8 {
                     new_pos = (rank - i) * 8 + file - i;
-                    /* if 0 <= new_pos && new_pos <= 63{
-
-                    } */
 
                     let current_file = new_pos - (rank - i) * 8;
                     let current_rank = (new_pos - (file - i)) / 8;
 
                     if (0 <= current_file && current_file <= 7)
                         && (0 <= current_rank && current_rank <= 7)
-                    /* (0 <= new_pos && new_pos <= 7)
-                        || (56 <= new_pos && new_pos <= 63)
-                        || (new_pos % 8 == 7 || new_pos % 8 == 0) */
-                    /* && ((rank + i) * 8 + (file + i)) / 8 > 8  */
                     {
-                        // eprintln!("({}, {})", file - i, rank - i)
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                     } else {
                         eprintln!("reached the border");
@@ -514,21 +345,13 @@ impl Game {
                 eprintln!("backward-right");
                 for i in 0..8 {
                     new_pos = (rank - i) * 8 + file + i;
-                    /* if 0 <= new_pos && new_pos <= 63{
-
-                    } */
 
                     let current_file = new_pos - (rank - i) * 8;
                     let current_rank = (new_pos - (file + i)) / 8;
 
                     if (0 <= current_file && current_file <= 7)
                         && (0 <= current_rank && current_rank <= 7)
-                    /* (0 <= new_pos && new_pos <= 7)
-                        || (56 <= new_pos && new_pos <= 63)
-                        || (new_pos % 8 == 7 || new_pos % 8 == 0) */
-                    /* && ((rank + i) * 8 + (file + i)) / 8 > 8  */
                     {
-                        // eprintln!("({}, {})", file + i, rank - i)
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
                     } else {
                         eprintln!("reached the border");
@@ -554,10 +377,11 @@ impl Game {
                 }
             }
 
-            Some(Piece::Knight(Colour::White)) => {
+            Some(Piece::Knight(_colour)) => {
                 // forward
                 if (rank + 2) * 8 < 7 * 8 + file {
                     // right
+
                     if file + 1 < 8 {
                         legal_moves.push(format!(
                             "{}",
@@ -572,6 +396,7 @@ impl Game {
                         ));
                     }
                 }
+
                 // backwards
                 if (rank - 2) * 8 > 0 {
                     //right
@@ -589,6 +414,7 @@ impl Game {
                         ));
                     }
                 }
+
                 // right
                 if file + 2 < 8 {
                     // forward
@@ -606,10 +432,11 @@ impl Game {
                         ));
                     }
                 }
+
                 // left
                 if file - 2 >= 0 {
                     //backward
-                    if (rank - 1) * 8 < 7 * 8 + file - 2 {
+                    if (rank - 1) * 8 > 0 {
                         legal_moves.push(format!(
                             "{}",
                             Game::convert_to_notation((rank - 1) * 8 + file - 2)
@@ -625,7 +452,7 @@ impl Game {
                 }
             }
 
-            Some(Piece::King(Colour::White)) => {
+            Some(Piece::King(_colour)) => {
                 // 1 step back
                 if position - 1 * 8 > 0 {
                     new_pos = position - 8;
@@ -674,53 +501,8 @@ impl Game {
                 }
             }
             _ => panic!("{:?}", self.board[position as usize]),
-            // Piece::Queen => /*...*/,
         }
         return Some(legal_moves);
-
-        /* let (file, rank) = (position[0], position[1]);
-        match &self {
-            // this would look better if you just subtracted by 8 instead
-            Piece::King(_colour) => {
-                let mut legal_moves: Vec<String> = vec![];
-                if (rank - 1) * 8 + file > 0 {
-                    legal_moves.push(format!("<{}><{}>", file, rank - 1));
-
-                    if (rank - 1) * 8 + (file - 1) > (rank - 1) * 8 {
-                        legal_moves.push(format!("<{}><{}>", file - 1, (rank - 1)));
-                    }
-
-                    if (rank - 1) * 8 + (file + 1) < (rank - 1) * 8 + 8 {
-                        legal_moves.push(format!("<{}><{}>", file + 1, (rank - 1)));
-                    }
-                }
-
-                if (rank + 1) * 8 + file < 8 * 8 + file {
-                    legal_moves.push(format!("<{}><{}>", file, rank + 1));
-
-                    if (rank + 1) * 8 + (file - 1) > (rank + 1) * 8 {
-                        legal_moves.push(format!("<{}><{}>", file - 1, (rank + 1)));
-                    }
-
-                    if (rank + 1) * 8 + (file + 1) < (rank + 1) * 8 + 8 {
-                        legal_moves.push(format!("<{}><{}>", file + 1, (rank + 1)));
-                    }
-                }
-
-                if rank * 8 + (file - 1) > rank * 8 {
-                    legal_moves.push(format!("<{}><{}>", file - 1, rank));
-                }
-                if rank * 8 + (file + 1) < rank * 8 + 8 {
-                    legal_moves.push(format!("<{}><{}>", file + 1, rank));
-                } else {
-                    return None;
-                }
-
-                return Some(legal_moves);
-            }
-            _ => None,
-            // Piece::Queen => /*...*/,
-        } */
     }
 }
 
@@ -814,7 +596,7 @@ mod tests {
 
         // let king = Piece::King(crate::Colour::White);
 
-        let moves = game.get_possible_moves("d1");
+        let moves = game.get_possible_moves("b1");
 
         println!("{:?}", moves);
 
@@ -830,7 +612,7 @@ mod tests {
     fn try_make_move() {
         let mut game = Game::new();
 
-        game.make_move("e2", "e4");
+        game.make_move("b8", "a6");
 
         println!("{:?}", game)
     }
