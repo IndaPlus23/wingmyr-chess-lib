@@ -131,6 +131,7 @@ impl Game {
                 }
             }
         }
+
         /*
 
         for (rank, rank_str) in board_template.iter().enumerate() {
@@ -161,7 +162,7 @@ impl Game {
             state: GameState::InProgress,
             /* black: 0,
             white: 1, */
-            active_colour: Colour::Black, /* White */
+            active_colour: Colour::/* Black, */ White,
             board: bboard,
         }
     }
@@ -335,13 +336,24 @@ impl Game {
                 if 8 < position && position <= 16 {
                     // if pawn hasn't been moved
                     new_pos = position + 8;
-                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                    if self.board[new_pos as usize].is_none(){
+                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));}
 
-                    new_pos = position + 16;
-                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)))
+                    new_pos = position + 16; // two steps forward
+                    if self.board[(position + 8) as usize].is_none(){
+                        legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));}
                 } else {
                     new_pos = position + 8;
-                    legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                    if self.board[new_pos as usize].is_none(){
+                        legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));}
+                }
+                if self.board[(position + 8 + 1) as usize].is_some() || self.board[(position+8-1) as usize].is_some(){
+                    if self.get_piece_colour(position+8-1) != Some(self.active_colour){
+                        legal_moves.push(format!("{}", Game::convert_to_notation(position+8-1)));
+                    }
+                    if self.get_piece_colour(position+8+1) != Some(self.active_colour){
+                        legal_moves.push(format!("{}", Game::convert_to_notation(position+8+1)));
+                    }
                 }
             }
             Some(Piece::Pawn(Colour::Black)) => {
@@ -379,6 +391,16 @@ impl Game {
                 }
                 for x in 0..file_range {
                     new_pos = rank * 8 + x;
+
+                    if self.board[new_pos as usize].is_some() {
+                        if self.get_piece_colour(position) == Some(self.active_colour) {
+                            break;
+                        } else {
+                            legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
+                            break;
+                        }
+                    }
+
                     if rank * 8 <= x && x < (rank + 1) * 8 {
                         legal_moves.push(format!("{}", Game::convert_to_notation(new_pos)));
                     }
@@ -809,7 +831,7 @@ impl fmt::Debug for Game {
             };
             // }
             if (rank + 1) % 8 == 0 && rank != 0 {
-                println!("{}", rank);
+                // println!("{}", rank);
                 board_string += "\n";
             }
         }
@@ -862,7 +884,7 @@ mod tests {
 
         // let king = Piece::King(crate::Colour::White);
 
-        let moves = game.get_possible_moves("a1");
+        let moves = game.get_possible_moves("g2");
 
         println!("{:?}", moves);
 
