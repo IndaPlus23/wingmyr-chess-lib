@@ -10,4 +10,4 @@ Functions that currently work:
 | `pub fn convert_from_notation(notation: &str) -> (i32, i32)` | Takes chess notation as a string (e.g. "e1") and return a tuple (file, rank). |
 | `pub fn convert_to_notation(numeric_position: i32) -> String` | Takes an index on the board and returns it in chess notation
 
-The formula for getting the numerical position on the board is rank*8+file.
+The formula for getting the numerical position on the board is `rank * 8 + file`.
