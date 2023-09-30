@@ -1091,6 +1091,18 @@ impl Game {
             }
 
             Some(Piece::Knight(_colour)) => {
+                println!("file: {} rank: {}", file, rank);
+                println!(
+                    "amogaba {} {} {} {} {} {} {} {}",
+                    (rank + 2) * 8 + file + 1,
+                    (rank + 2) * 8 + file - 1,
+                    (rank - 2) * 8 + file + 1,
+                    (rank - 2) * 8 + file - 1,
+                    (rank + 1) * 8 + file + 2,
+                    (rank - 1) * 8 + file + 2,
+                    (rank - 1) * 8 + file - 2,
+                    (rank + 1) * 8 + file - 2
+                );
                 // forward
                 if (rank + 2) * 8 < 7 * 8 + file {
                     // right
