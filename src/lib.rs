@@ -1025,8 +1025,6 @@ impl Game {
         let mut fake_board = self.board.clone(); // copy of the board
         match considered_moves {
             _vector => {
-                // if vector.contains(&_to.to_string()) {
-                // this shouldn always be true but who knows
                 fake_board[to as usize] = fake_board[from as usize];
                 fake_board[from as usize] = None;
                 return Some(fake_board);
