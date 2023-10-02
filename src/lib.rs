@@ -978,7 +978,7 @@ impl Game {
     }
 
     /// takes potential moves and removes the ones that would result in putting onself in check
-    fn get_legal_moves(
+    pub fn get_legal_moves(
         &self,
         _position: &str,
         checking_for: Colour,
